@@ -1,28 +1,3 @@
-Meteor.methods({
-
-
-    /*getPageFollowers:function(profile){
-        check(profile,String); //checking param type
-
-        Future = Npm.require('fibers/future');
-
-        //global vars
-        var result = null, error = null;
-
-        // Client callback : Set up futures for card and BO callbacks
-        var futureTwitterAPI = new Future();
-
-        //----------------- TEST BO --------------------
-        //FUTURE
-        apiCall_getFollowers(profile, futureTwitterAPI); //todo: use meteorhacks:async
-        var resultTwitterAPI = futureTwitterAPI.wait();
-        console.log('resultTwitterAPI : ' + resultTwitterAPI.result);//JSON.stringify(resultBO,null,4));
-
-        //----------------- END TEST BO --------------------
-
-        return 'hello';
-    }*/
-});
 
 /*
  Consumer key : cCbsm31rM8Pdvd5zMBMS3vDbc
@@ -30,9 +5,8 @@ Meteor.methods({
  */
 
 
-
 if (Meteor.isServer) {
-    Meteor.startup(function () {
+    /*Meteor.startup(function () {
         // code to run on server at startup
 
         //var Sleep = Meteor.npmRequire( 'sleep' ) ;
@@ -65,10 +39,10 @@ if (Meteor.isServer) {
         //cursor = getFollowers('business', cursor, 'followers');
 
         console.log( 'END' ) ;
-    });
+    });*/
 }
 
-
+/*
 function getFollowers(screen_name, cursor, filename){
 
     var Twit = Npm.require('twit');
@@ -113,7 +87,7 @@ function getFollowers(screen_name, cursor, filename){
                  return 0;
                  }
                  else console.log('OK FS');
-                 });*/
+                 });
                 console.log('Current cursor : ' + cursor + ', next cursor : ' + data.next_cursor);
                 //cursor = data.next_cursor; //next page
 
@@ -145,3 +119,4 @@ function getFollowers(screen_name, cursor, filename){
 
     return future.wait();
 }
+ */

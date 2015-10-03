@@ -5,6 +5,14 @@
 # but you can also edit it by hand.
 
 meteor-platform
-autopublish
-insecure
 froatsnook:sleep
+accounts-password
+iron:router
+useraccounts:iron-routing
+zimme:iron-router-active
+less
+useraccounts:bootstrap
+momentjs:moment
+reywood:publish-composite
+underscorestring:underscore.string
+yasinuslu:blaze-meta
