@@ -16,14 +16,16 @@ Meteor.methods({
         var time_estimated = sessions * 920;
         var date = new Date().toISOString();
 
-        var estimations = [];
+        var estimations = []; //array of estimations
+
+        //brand new estimation
         var estimation = {
             amount:amount_results,
             time_estimated:time_estimated,
             date: date
         };
-        estimations.push(estimation);
 
+        //basic item
         var item = {
             owner:params.owner,
             account:params.account
@@ -32,12 +34,19 @@ Meteor.methods({
         //we check if we already covered that account
         var item_temp = getAccount(params.account);
 
-        if(item_temp){
-            estimations = item_temp.estimations;
+        if(item_temp){//we push former and new estimations by merging them
+            item_temp.estimations.push(estimation);
+            //we finish the setup of the item
+            item.estimations = item_temp.estimations;
+
+        }
+        else{//we just push new estimation
             estimations.push(estimation);
+            //we finish the setup of the item
+            item.estimations = estimations;
         }
 
-        item.estimations = estimations;
+
 
 
 
