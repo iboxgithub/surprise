@@ -1,25 +1,6 @@
 /**
  * Created by ibox on 20/09/15.
  */
-/*
- Meteor.call('webNewTransaction', params, function(error, result) {
- // display the error to the user and abort
- if (error) {
- console.log('Client ERROR : ' + error.reason);
- $('#output').val('Hevon API is unreachable, please contact support');
- }
- else {
- console.log('Client COOL : ' + JSON.stringify(result, null, 4));
- $('#output').val(result.data.result.data.id + ' - ' + result.data.result.data.amount_received);
- //we maj client wallets TODO : deduce amount sent, but amount available is not direct
- //TODO : the feature flash transfer will be available later (when Hevon will hae a lot of cash flow)
- }
-
- Router.go('account', {/*_id: result._id});
-});
- */
-
-
 
 Template.dashboard.events({
 
@@ -53,18 +34,35 @@ Template.dashboard.events({
     },
     'submit .process': function(e){
         e.preventDefault();
+        var folder = prompt('Please indicate your folder path:');
         console.log('process');
         var account = $(e.target).find('[id=account]').val();
         var _id = $(e.target).find('[id=_id]').val();
 
         console.log(_id + ' - Processing...' + account);
+
+        var params = {account:account, filename:'followers', folder:folder};
+
+        Meteor.call('followers', params, function(error, result) {
+            // display the error to the user and abort
+            if (error) {
+                console.log('Client Callback ERROR : ' + error.reason);
+                //$('#output').val('Hevon API is unreachable, please contact support');
+            }
+            else {
+                //var time_estimated = result;//JSON.stringify(result, null, 4);
+                console.log('Client Callback OK : ' + result + ' seconds estimated');
+
+            }
+        });
+
     }
 });
 
 Template.dashboard.helpers({
     estimates: function(){
 
-        var items = Operations.find({owner:Meteor.userId()},{sort:{date:-1}});
+        var items = Operations.find({owner:Meteor.userId()},{sort:{estimations:{date:-1}}});
         //console.log(JSON.stringify(items, null, 4));
         var list = [];
 
@@ -83,5 +81,8 @@ Template.dashboard.helpers({
         });
 
         return list;
+    },
+    random: function(date){
+        return new Date(date).getTime();
     }
 });

@@ -9,10 +9,11 @@ froatsnook:sleep
 accounts-password
 iron:router
 useraccounts:iron-routing
-zimme:iron-router-active
 less
 useraccounts:bootstrap
 momentjs:moment
 reywood:publish-composite
 underscorestring:underscore.string
 yasinuslu:blaze-meta
+zimme:active-route
+mizzao:bootstrap-3

@@ -39,6 +39,7 @@ meteor@1.1.6
 meteor-platform@1.2.2
 minifiers@1.1.5
 minimongo@1.0.8
+mizzao:bootstrap-3@3.3.1_1
 mobile-status-bar@1.0.3
 momentjs:moment@2.10.6
 mongo@1.1.0
@@ -72,4 +73,3 @@ webapp@1.2.0
 webapp-hashing@1.0.3
 yasinuslu:blaze-meta@0.3.3
 zimme:active-route@2.0.4_1
-zimme:iron-router-active@2.0.1

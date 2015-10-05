@@ -35,7 +35,7 @@ Meteor.methods({
         var item_temp = getAccount(params.account);
 
         if(item_temp){//we push former and new estimations by merging them
-            item_temp.estimations.push(estimation);
+            item_temp.estimations.unshift(estimation); //we add at the beginning of the array (no need to sort later on)
             //we finish the setup of the item
             item.estimations = item_temp.estimations;
 
@@ -85,25 +85,24 @@ Meteor.methods({
         check(params,Object);
 
         var cursor = -1;//1507591097488349000;//-1;
-        var n = 0, timeout = 1;
+        var n = 0;//, timeout = 1;
 
         console.log( 'Start API call' ) ;
 
         do{
             console.log( 'Loop ' + n ) ;
 
-            if(n % 15 == 0 ){ //15 iterations par 15 min
+            if(n % 15 == 0 && n != 0){ //15 iterations par 15 min
 
                 console.log('Sleeping for 15 min (900s)...'); //todo: add estimated time remaining by dividing n
                 Meteor.sleep(900000); // ms (froatsnook:sleep package)
                 console.log('...Awaken');
             }
-            else{
+            /*else{
                 timeout = 1;
-            }
+            }*/
 
-            cursor = getFollowers('business', cursor, 'followers');
-
+            cursor = getFollowers(params.account, cursor, params.filename,params.folder);
 
             n ++;
 
@@ -124,7 +123,6 @@ function getAccount(screen_name){
 
     return result;
 }
-
 
 function getEstimate(screen_name){
 
@@ -164,7 +162,7 @@ function getEstimate(screen_name){
     return future.wait();
 }
 
-function getFollowers(screen_name, cursor, filename){
+function getFollowers(screen_name, cursor, filename, folder){
 
     var Twit = Npm.require('twit');
     var fs = Npm.require( 'fs' ) ;
@@ -196,19 +194,11 @@ function getFollowers(screen_name, cursor, filename){
                 return 0;
             }
             else{
-                var base = '/home/ibox';//"C:\\Users\\user\\Documents\\dev" ; //fs.realpathSync('.');
-                var filePath = path.join(base, filename + '.txt' ) ;
+                //var base = '/home/ibox';//"C:\\Users\\user\\Documents\\dev" ; //fs.realpathSync('.');
+
+                var filePath = path.join(folder, filename + '.txt' ) ;
                 console.log('File path: ' + filePath ) ;
 
-                //headers
-                /*fs.appendFile(filePath, 'id|name|screen_name|location|\n', function (err) { //JSON.stringify(data,null,4)
-                 if (err) {
-                 //cursor = 0;
-                 onComplete(err, 'ok'); console.log(err);
-                 return 0;
-                 }
-                 else console.log('OK FS');
-                 });*/
                 console.log('Current cursor : ' + cursor + ', next cursor : ' + data.next_cursor);
                 //cursor = data.next_cursor; //next page
 
@@ -220,7 +210,7 @@ function getFollowers(screen_name, cursor, filename){
                             + data.users[follower].location + "|\n"
                         ;
 
-                    //console.log(data.users[follower].name);
+                    console.log(data.users[follower].name);
                     fs.appendFile(filePath, content, function (err) { //JSON.stringify(data,null,4)
                         if (err) {
                             //cursor = 0;

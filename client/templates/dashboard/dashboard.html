@@ -11,6 +11,12 @@
                         </div>
                     </div>
                 </td>
+                <td>
+                    <div class="file">
+                        <strong>File to DL</strong>
+                        <a href="/home/ibox/followers.txt" src="/home/ibox/followers.txt" download="test.txt">Download</a>
+                    </div>
+                </td>
 
             </tr>
         </table>
@@ -26,26 +32,41 @@
             <label class="control-label" for="account">Account requested</label>
                 <input id="account" class="form-control" value="{{this.account}}"/>
 
-            {{#each this.estimations}}
-                <label class="control-label" for="date">Date of estimation</label>
-                    <input id="date" class="form-control" value="{{this.date}}"/>
-                <label class="control-label" for="amount">Amount of followers</label>
-                    <input id="amount" class="form-control" value="{{this.amount}}"/>
-                <label class="control-label" for="amount">Time estimated (seconds)</label>
-                    <input id="time_estimated" class="form-control" value="{{this.time_estimated}}"/>
-                {{#if this.min_estimates}}
-                    <label class="control-label" for="min_estimates">Time estimated (minutes)</label>
-                        <input id="min_estimates" class="form-control" value="{{this.min_estimates}}"/>
-                {{/if}}
-                {{#if this.hours_estimates}}
-                    <label class="control-label" for="hours_estimates">Time estimated (hours)</label>
-                        <input id="hours_estimates" class="form-control" value="{{this.hours_estimates}}"/>
-                {{/if}}
-                {{#if this.days_estimates}}
-                    <label class="control-label" for="days_estimates">Time estimated (days)</label>
-                        <input id="days_estimates" class="form-control" value="{{this.days_estimates}}"/>
-                {{/if}}
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                {{#each this.estimations}}
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#toto{{random this.date}}" aria-expanded="true" aria-controls="collapseOne">
+                                Date of estimation: {{this.date}}
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="toto{{random this.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <label class="control-label" for="amount">Amount of followers</label>
+                            <input id="amount" class="form-control" value="{{this.amount}}"/>
+                            <label class="control-label" for="amount">Time estimated (seconds)</label>
+                            <input id="time_estimated" class="form-control" value="{{this.time_estimated}}"/>
+                            {{#if this.min_estimates}}
+                                <label class="control-label" for="min_estimates">Time estimated (minutes)</label>
+                                <input id="min_estimates" class="form-control" value="{{this.min_estimates}}"/>
+                            {{/if}}
+                            {{#if this.hours_estimates}}
+                                <label class="control-label" for="hours_estimates">Time estimated (hours)</label>
+                                <input id="hours_estimates" class="form-control" value="{{this.hours_estimates}}"/>
+                            {{/if}}
+                            {{#if this.days_estimates}}
+                                <label class="control-label" for="days_estimates">Time estimated (days)</label>
+                                <input id="days_estimates" class="form-control" value="{{this.days_estimates}}"/>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+
+
             {{/each}}
+            </div>
         </div>
         <input type="submit" id="process" value="Process" class="btn btn-info"/>
     </form>
