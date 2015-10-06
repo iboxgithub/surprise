@@ -1,6 +1,9 @@
 DashboardController = AppController.extend({
   waitOn: function() {
-    return this.subscribe('operations');
+    return [
+        this.subscribe('operations'),
+        this.subscribe('files')
+        ]
   },
   data: {
     //items: Items.find({})

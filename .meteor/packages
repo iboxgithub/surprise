@@ -17,3 +17,5 @@ underscorestring:underscore.string
 yasinuslu:blaze-meta
 zimme:active-route
 mizzao:bootstrap-3
+cfs:standard-packages
+cfs:filesystem

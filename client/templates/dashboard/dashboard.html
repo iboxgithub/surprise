@@ -1,28 +1,32 @@
 
 <template name="dashboard">
-    <form class="estimation">
+
         <table>
             <tr>
                 <td >
-                    <div class="form-group">
-                        <label class="control-label" for="twitter_account">Enter the Twitter account (@account)</label>
-                        <div class="twitter_account">
-                            <input id="twitter_account" class="form-control"/>
+                    <form class="estimation">
+                        <div class="form-group">
+                            <label class="control-label" for="twitter_account">Enter the Twitter account (@account)</label>
+                            <div class="twitter_account">
+                                <input id="twitter_account" class="form-control"/>
+                            </div>
                         </div>
-                    </div>
+                        <input type="submit" id="estimate" value="Estimate processing time" class="btn btn-primary"/>
+                    </form>
                 </td>
                 <td>
                     <div class="file">
                         <strong>File to DL</strong>
-                        <a href="/home/ibox/followers.txt" src="/home/ibox/followers.txt" download="test.txt">Download</a>
+                        <a href="/home/ibox/followers.txt" download="test.txt">Download</a>
+                        <form class="download">
+                            <input type="submit" id="download" value="Download2" class="btn btn-primary"/>
+                        </form>
                     </div>
                 </td>
 
             </tr>
         </table>
 
-        <input type="submit" id="estimate" value="Estimate processing time" class="btn btn-primary"/>
-    </form>
 
     {{#each estimates}}
     <form class="process">
@@ -71,5 +75,13 @@
         <input type="submit" id="process" value="Process" class="btn btn-info"/>
     </form>
     {{/each}}
+
+    <div class="fileList">
+        {{#each files}}
+        <div class="file">
+            <strong>{{this.name}}</strong> <a href="{{this.url download=true}}" class="btn btn-primary" target="_parent">Download {{this._id}}</a>
+        </div>
+        {{/each}}
+    </div>
 
 </template>

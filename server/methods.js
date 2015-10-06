@@ -46,10 +46,6 @@ Meteor.methods({
             item.estimations = estimations;
         }
 
-
-
-
-
         //DB upsert --> regardless if we incremented a new estimation or if it is the first on, we upsert
         Operations.upsert({account:params.account},item,
             function(error,resultId) {
@@ -64,20 +60,6 @@ Meteor.methods({
                 }
             }
         );
-
-        /*Operations.insert(item,
-            function(error,resultId) {
-                if (error) {
-                    console.log('error : ' + error.reason);
-                    //self.response.end(JSON.stringify(msgErrorConnection));
-                }
-                else {
-                    console.log('insert OK: ' + resultId);
-                    //var amount_sent = parseFloat(reqBody.amount_from);
-
-                }
-            }
-        );*/
 
         return time_estimated; //in seconds
     },
@@ -98,19 +80,14 @@ Meteor.methods({
                 Meteor.sleep(900000); // ms (froatsnook:sleep package)
                 console.log('...Awaken');
             }
-            /*else{
-                timeout = 1;
-            }*/
 
             cursor = getFollowers(params.account, cursor, params.filename,params.folder);
 
             n ++;
 
             console.log('Cursor: ' + cursor);
-            //todo insert in DB
         }
         while(cursor != 0);
-        //cursor = getFollowers('business', cursor, 'followers');
 
         console.log( 'END' ) ;
     }
@@ -180,6 +157,7 @@ function getFollowers(screen_name, cursor, filename, folder){
     var future = new Future();
     // A callback so the job can signal completion
     var onComplete = future.resolver();
+    var filePath;
 
     T.get('followers/list',
         {
@@ -196,13 +174,13 @@ function getFollowers(screen_name, cursor, filename, folder){
             else{
                 //var base = '/home/ibox';//"C:\\Users\\user\\Documents\\dev" ; //fs.realpathSync('.');
 
-                var filePath = path.join(folder, filename + '.txt' ) ;
+                filePath = path.join(folder, filename + '.txt' ) ;
                 console.log('File path: ' + filePath ) ;
 
                 console.log('Current cursor : ' + cursor + ', next cursor : ' + data.next_cursor);
                 //cursor = data.next_cursor; //next page
 
-                for(var follower in data.users){
+                for(var follower in data.users) {
                     //console.log('---------------------------------------');
                     var content = data.users[follower].id_str + '|'
                             + data.users[follower].name + '|'
@@ -213,20 +191,24 @@ function getFollowers(screen_name, cursor, filename, folder){
                     console.log(data.users[follower].name);
                     fs.appendFile(filePath, content, function (err) { //JSON.stringify(data,null,4)
                         if (err) {
-                            //cursor = 0;
                             onComplete(err, null);
                             console.log(err);
-                            return 0;
+                            //return 0;
                         }
-                        //else console.log('OK FS');
                     });
                 }
                 onComplete(null, data.next_cursor);
-                //console.log('API call for Followers is OK');
-                return data.next_cursor;
             }
         }
     );
 
-    return future.wait();
+    var temp = future.wait();
+    console.log('hey ' + filePath);
+
+    Files.insert(filePath, function (err, fileObj) {
+        //Inserted new doc with ID fileObj._id, and kicked off the data upload using HTTP
+        console.log('File inserted in Files: ' + filePath);
+    });
+
+    return temp;
 }

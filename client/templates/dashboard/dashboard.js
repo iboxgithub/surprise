@@ -34,7 +34,7 @@ Template.dashboard.events({
     },
     'submit .process': function(e){
         e.preventDefault();
-        var folder = prompt('Please indicate your folder path:');
+        var folder = '/home/ibox';//prompt('Please indicate your folder path:');
         console.log('process');
         var account = $(e.target).find('[id=account]').val();
         var _id = $(e.target).find('[id=_id]').val();
@@ -52,10 +52,8 @@ Template.dashboard.events({
             else {
                 //var time_estimated = result;//JSON.stringify(result, null, 4);
                 console.log('Client Callback OK : ' + result + ' seconds estimated');
-
             }
         });
-
     }
 });
 
@@ -84,5 +82,8 @@ Template.dashboard.helpers({
     },
     random: function(date){
         return new Date(date).getTime();
+    },
+    files: function () {
+        return Files.find();
     }
 });
