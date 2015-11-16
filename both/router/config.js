@@ -1,6 +1,9 @@
-/**
- * Created by ibox on 19/09/15.
- */
+//1. the basic config is in both/router/config.js
+//2. routes are in both/router/routes.js
+//3. the controllers are defined in both/controllers/...
+//4. the access security is handled by useraccounts package and configured in both/accounts/...
+
+
 Router.configure({
     layoutTemplate: 'appLayout',
     loadingTemplate: 'loading',

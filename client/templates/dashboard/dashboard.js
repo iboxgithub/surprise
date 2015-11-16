@@ -4,6 +4,7 @@
 
 Template.dashboard.events({
 
+    //to estimate how long it would take to grab followers of this account
     'submit .estimation': function (e) {
         e.preventDefault();
         console.log('estimation');
@@ -30,8 +31,8 @@ Template.dashboard.events({
                 }
             });
         }
-
     },
+    //to grab all followers of this account
     'submit .process': function(e){
         e.preventDefault();
         var folder = '/home/ibox';//prompt('Please indicate your folder path:');
