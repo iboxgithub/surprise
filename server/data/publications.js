@@ -9,6 +9,11 @@ Meteor.publish('operations', function() {
     return Operations.find();
 });
 
+Meteor.publish('operations_dashboard', function() {
+    //console.log(Meteor.userId()); //
+    return Operations.find({owner:this.userId},{/*sort:{estimations:{date:-1}}*/}, {id: -1, estimations: 1});
+});
+
 Meteor.publish('files', function() {
     return Files.find();
 });

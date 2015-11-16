@@ -20,7 +20,7 @@
         </table>
 
 
-    {{#each estimates}}
+    {{#each operations_dashboard_helper}}
     <form class="process">
         <div class="form-group">
             <p>__________________________________</p>
@@ -33,20 +33,20 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" role="tab" id="headingOne">
                         <h4 class="panel-title">
-                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#toto{{random this.date}}" aria-expanded="true" aria-controls="collapseOne">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{random this.date}}" aria-expanded="true" aria-controls="collapseOne">
                                 Date of estimation: {{this.date}}
                             </a>
                         </h4>
                     </div>
-                    <div id="toto{{random this.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    <div id="{{random this.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                         <div class="panel-body">
                             <label class="control-label" for="amount">Amount of followers</label>
                             <input id="amount" class="form-control" value="{{this.amount}}"/>
-                            <label class="control-label" for="amount">Time estimated (seconds)</label>
-                            <input id="time_estimated" class="form-control" value="{{this.time_estimated}}"/>
+                            <label class="control-label" for="amount">Time estimated</label>
+                            <input id="time_estimated" class="form-control" value="{{time_converter this.time_estimated}}"/>
                             {{#if this.min_estimates}}
-                                <label class="control-label" for="min_estimates">Time estimated (minutes)</label>
-                                <input id="min_estimates" class="form-control" value="{{this.min_estimates}}"/>
+                                <label class="control-label" for="mins_estimates">Time estimated (minutes)</label>
+                                <input id="mins_estimates" class="form-control" value="{{this.mins_estimates}}"/>
                             {{/if}}
                             {{#if this.hours_estimates}}
                                 <label class="control-label" for="hours_estimates">Time estimated (hours)</label>

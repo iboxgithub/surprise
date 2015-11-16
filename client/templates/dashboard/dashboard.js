@@ -59,32 +59,35 @@ Template.dashboard.events({
 });
 
 Template.dashboard.helpers({
-    estimates: function(){
 
-        var items = Operations.find({owner:Meteor.userId()},{sort:{estimations:{date:-1}}});
-        //console.log(JSON.stringify(items, null, 4));
-        var list = [];
-
-        items.forEach(function(item){
-            //checking if it is useful to display hours or days
-            if(item['time_estimated'] / 60 > 1){
-                item['min_estimates'] = item['time_estimated'] / 60;
-            }
-            if(item['time_estimated'] / 3600 > 1){
-                item['hours_estimates'] = item['time_estimated'] / 3600;
-            }
-            if((item['time_estimated'] / 3600) / 24 > 0.5){
-                item['days_estimates'] = (item['time_estimated'] / 3600) / 24;
-            }
-            list.push(item);
-        });
-
-        return list;
+    //to get previous estimates stored in DB (subscription done via route)
+    operations_dashboard_helper: function(){
+        return Operations.find({},{sort:{estimations:{date:-1}}});//todo: sort doesnt work
     },
     random: function(date){
         return new Date(date).getTime();
     },
     files: function () {
         return Files.find();
+    },
+    time_converter: function(time){
+
+        var duration = '';
+        if((time / 3600) / 24 > 0.5){//days
+            return ((time / 3600) / 24).toFixed(1) + ' days';
+        }
+        else if((time / 3600) > 1){//hours
+            //if(duration == ''){duration += (time / 3600).toFixed(1) + ' hours'}
+            //else{
+            return (time / 3600).toFixed(1) + ' hours';
+        }
+        else if(time / 60 > 1){//min
+            //if(duration == ''){duration += (time / 60) + ' minutes'}
+            //else{
+            return (time / 60).toFixed(1) + ' minutes';
+        }
+        else{
+            return time + ' seconds';
+        }
     }
 });
