@@ -35,14 +35,16 @@ Template.dashboard.events({
     //to grab all followers of this account
     'submit .process': function(e){
         e.preventDefault();
-        var folder = '/home/ibox';//prompt('Please indicate your folder path:');
+        //where to download
+        var folder = '/home';//todo prompt('Please indicate your folder path:');
         console.log('process');
         var account = $(e.target).find('[id=account]').val();
         var _id = $(e.target).find('[id=_id]').val();
+        var cursor = $(e.target).find('[id=cursor]').val();
 
         console.log(_id + ' - Processing...' + account);
 
-        var params = {account:account, filename:'followers', folder:folder};
+        var params = {cursor:cursor, account:account, filename:'followers_' + account, folder:folder};
 
         Meteor.call('followers', params, function(error, result) {
             // display the error to the user and abort
@@ -67,12 +69,35 @@ Template.dashboard.helpers({
     random: function(date){
         return new Date(date).getTime();
     },
-    files: function () {
-        return Files.find();
+    /*files: function () {
+        return Files.find({"original.name":"followers2.txt"});
+    },*/
+    fileByAccount: function (account) {
+        //console.log('sdfsd ' + account);
+        return Files.find({"original.name":"followers2.txt"}); //todo: update insert
+    },
+    status: function () {
+        var account = $(e.target).find('[id=account]').val();
+        var _id = $(e.target).find('[id=_id]').val();
+        var cursor = $(e.target).find('[id=cursor]').val();
+        var time_spent = $(e.target).find('[id=time_spent]').val();
+        var time_remaining = $(e.target).find('[id=time_remaining]').val();
+
+        if(cursor == -1){
+            return 'You never asked to get those followers';
+        }
+        else if(cursor == 0){
+            return 'Followers available for download';
+        }
+        else{
+            //todo: add warning if Time spent is too high regarding estimations
+            return 'Last cursor: ' + cursor + ' | Time remaining: ' + time_remaining + ' | Time spent: ' + time_spent;
+        }
+
+        //return Files.find({"original.name":"followers2.txt"}); //todo: update insert
     },
     time_converter: function(time){
 
-        var duration = '';
         if((time / 3600) / 24 > 0.5){//days
             return ((time / 3600) / 24).toFixed(1) + ' days';
         }

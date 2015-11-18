@@ -28,7 +28,8 @@ Meteor.methods({
         //basic item
         var item = {
             owner:params.owner,
-            account:params.account
+            account:params.account,
+            cursor:-1
         };
 
         //we check if we already covered that account
@@ -66,9 +67,10 @@ Meteor.methods({
     followers: function(params){
         check(params,Object);
 
-        var cursor = -1;//1507591097488349000;//-1;
+        var cursor = params.cursor;//1507591097488349000;//-1;
         var n = 0;//, timeout = 1;
 
+        //todo: update Operations with process request
         console.log( 'Start API call' ) ;
 
         do{
@@ -77,6 +79,7 @@ Meteor.methods({
             if(n % 15 == 0 && n != 0){ //15 iterations par 15 min
 
                 console.log('Sleeping for 15 min (900s)...'); //todo: add estimated time remaining by dividing n
+                //todo: insert remaining time + last cursor to continue treatment in case of failure
                 Meteor.sleep(900000); // ms (froatsnook:sleep package)
                 console.log('...Awaken');
             }

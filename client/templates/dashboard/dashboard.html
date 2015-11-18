@@ -1,23 +1,21 @@
 
 <template name="dashboard">
 
-        <table>
-            <tr>
-                <td >
-                    <form class="estimation">
-                        <div class="form-group">
-                            <label class="control-label" for="twitter_account">Enter the Twitter account (@account)</label>
-                            <div class="twitter_account">
-                                <input id="twitter_account" class="form-control"/>
-                            </div>
+    <table>
+        <tr>
+            <td >
+                <form class="estimation">
+                    <div class="form-group">
+                        <label class="control-label" for="twitter_account">Enter the Twitter account (@account)</label>
+                        <div class="twitter_account">
+                            <input id="twitter_account" class="form-control"/>
                         </div>
-                        <input type="submit" id="estimate" value="Estimate processing time" class="btn btn-primary"/>
-                    </form>
-                </td>
-
-
-            </tr>
-        </table>
+                    </div>
+                    <input type="submit" id="estimate" value="Estimate processing time" class="btn btn-primary"/>
+                </form>
+            </td>
+        </tr>
+    </table>
 
 
     {{#each operations_dashboard_helper}}
@@ -25,55 +23,67 @@
         <div class="form-group">
             <p>__________________________________</p>
             <input type="hidden" id="_id" value="{{this._id}}"/>
+            <input type="hidden" id="cursor" value="{{this.cursor}}"/>
             <label class="control-label" for="account">Account requested</label>
                 <input id="account" class="form-control" value="{{this.account}}"/>
 
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                {{#each this.estimations}}
-                <div class="panel panel-default">
-                    <div class="panel-heading" role="tab" id="headingOne">
-                        <h4 class="panel-title">
-                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{random this.date}}" aria-expanded="true" aria-controls="collapseOne">
-                                Date of estimation: {{this.date}}
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="{{random this.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                        <div class="panel-body">
-                            <label class="control-label" for="amount">Amount of followers</label>
-                            <input id="amount" class="form-control" value="{{this.amount}}"/>
-                            <label class="control-label" for="amount">Time estimated</label>
-                            <input id="time_estimated" class="form-control" value="{{time_converter this.time_estimated}}"/>
-                            {{#if this.min_estimates}}
-                                <label class="control-label" for="mins_estimates">Time estimated (minutes)</label>
-                                <input id="mins_estimates" class="form-control" value="{{this.mins_estimates}}"/>
-                            {{/if}}
-                            {{#if this.hours_estimates}}
-                                <label class="control-label" for="hours_estimates">Time estimated (hours)</label>
-                                <input id="hours_estimates" class="form-control" value="{{this.hours_estimates}}"/>
-                            {{/if}}
-                            {{#if this.days_estimates}}
-                                <label class="control-label" for="days_estimates">Time estimated (days)</label>
-                                <input id="days_estimates" class="form-control" value="{{this.days_estimates}}"/>
-                            {{/if}}
-                        </div>
-                    </div>
-                </div>
-
-
-            {{/each}}
+                <table>
+                    <tr>
+                        <td>
+                            {{#each this.estimations}}
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingOne">
+                                    <h4 class="panel-title">
+                                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{random this.date}}" aria-expanded="true" aria-controls="collapseOne">
+                                            Date of estimation: {{this.date}}
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="{{random this.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                    <div class="panel-body">
+                                        <label class="control-label" for="amount">Amount of followers</label>
+                                        <input id="amount" class="form-control" value="{{this.amount}}"/>
+                                        <label class="control-label" for="amount">Time estimated</label>
+                                        <input id="time_estimated" class="form-control" value="{{time_converter this.time_estimated}}"/>
+                                        {{#if this.min_estimates}}
+                                            <label class="control-label" for="mins_estimates">Time estimated (minutes)</label>
+                                            <input id="mins_estimates" class="form-control" value="{{this.mins_estimates}}"/>
+                                        {{/if}}
+                                        {{#if this.hours_estimates}}
+                                            <label class="control-label" for="hours_estimates">Time estimated (hours)</label>
+                                            <input id="hours_estimates" class="form-control" value="{{this.hours_estimates}}"/>
+                                        {{/if}}
+                                        {{#if this.days_estimates}}
+                                            <label class="control-label" for="days_estimates">Time estimated (days)</label>
+                                            <input id="days_estimates" class="form-control" value="{{this.days_estimates}}"/>
+                                        {{/if}}
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </td>
+                        <td>
+                            Ici mettre les infos de temps remaining et cursor en cours
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="submit" id="process" value="Process" class="btn btn-info"/>
+                        </td>
+                        <td>
+                            <div class="fileList">
+                                {{#each fileByAccount this.account}}
+                                <div class="file">
+                                    <a href="{{this.url download=true}}" class="btn btn-primary" target="_parent">Download {{this._id}}</a>
+                                </div>
+                                {{/each}}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
-        <input type="submit" id="process" value="Process" class="btn btn-info"/>
     </form>
     {{/each}}
-
-    <div class="fileList">
-        {{#each files}}
-        <div class="file">
-            <strong>{{this.name}}</strong> <a href="{{this.url download=true}}" class="btn btn-primary" target="_parent">Download {{this._id}}</a>
-        </div>
-        {{/each}}
-    </div>
-
 </template>
