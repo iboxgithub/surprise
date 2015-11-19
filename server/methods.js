@@ -9,11 +9,21 @@ Meteor.methods({
     estimate: function(params){
         check(params,Object);
 
-        // 15 iterations every 15 min, 200 results per iteration, 1 session = 15 iterations
+        // 15 iterations every 15 min, 200 results per iteration, 1 session = 15 iterations = 3000 results
+        //knowing that 1 iteration ~ 10 seconds
         var amount_results = getEstimate(params.account);
-        var iterations = amount_results / 200;
-        var sessions = iterations / 15; //1 session lasts 15 minutes minimum + 20s as treatment time so 920s
-        var time_estimated = sessions * 920;
+        var iterations = amount_results / 200; //e.g. for 6000 results we have 30 iterations
+        var sessions = iterations / 15 - 1; //...e.g. we would need 30/15 = 2 sessions for 6000 results - 1 session that is not complete (we dont need to wait 15 min because of Twitter API)
+        if(sessions < 0)
+            sessions = 0;//we never go negative
+        var out_session_iterations = iterations % 15;// so 0 in our case --> 15 iterations out of session
+        if(out_session_iterations == 0)
+            out_session_iterations = 15;
+        //1 session lasts 15 minutes minimum + 20s as treatment time so 920s to get 3000 results
+        var time_estimated = sessions * 920;//...so 920 seconds for 6000 results...
+        time_estimated += out_session_iterations * 10; //1 iteration ~ 10 seconds
+        time_estimated = time_estimated.toFixed(1);
+        // --> around 15 min for sure and
         var date = new Date().toISOString();
 
         var estimations = []; //array of estimations
@@ -55,7 +65,7 @@ Meteor.methods({
                     //self.response.end(JSON.stringify(msgErrorConnection));
                 }
                 else {
-                    console.log('insert OK: ' + resultId);
+                    console.log('insert OK: ' + params.account);
                     //var amount_sent = parseFloat(reqBody.amount_from);
 
                 }
@@ -80,17 +90,26 @@ Meteor.methods({
 
                 console.log('Sleeping for 15 min (900s)...'); //todo: add estimated time remaining by dividing n
                 //todo: insert remaining time + last cursor to continue treatment in case of failure
+                //to update operations with last session cursor todo + time remaining
+                Operations.update({account: params.account}, {cursor: cursor}, function (err, fileObj) {
+                    console.log('Last session cursor updated in Operations: ' + cursor);
+                });
                 Meteor.sleep(900000); // ms (froatsnook:sleep package)
                 console.log('...Awaken');
             }
 
-            cursor = getFollowers(params.account, cursor, params.filename,params.folder);
+            cursor = getFollowers(params.account, cursor, params.filename, params.folder);
 
             n ++;
 
-            console.log('Cursor: ' + cursor);
+            console.log('Last iteration cursor: ' + cursor);
         }
         while(cursor != 0);
+
+        //to update operations with last cursor
+        Operations.update({account: params.account}, {cursor: cursor}, function (err, fileObj) {
+            console.log('Last cursor updated in Operations: ' + cursor);
+        });
 
         console.log( 'END' ) ;
     }
@@ -177,7 +196,7 @@ function getFollowers(screen_name, cursor, filename, folder){
             else{
                 //var base = '/home/ibox';//"C:\\Users\\user\\Documents\\dev" ; //fs.realpathSync('.');
 
-                filePath = path.join(folder, filename + '.txt' ) ;
+                filePath = path.join(folder, filename) ;
                 console.log('File path: ' + filePath ) ;
 
                 console.log('Current cursor : ' + cursor + ', next cursor : ' + data.next_cursor);
@@ -194,8 +213,8 @@ function getFollowers(screen_name, cursor, filename, folder){
                     console.log(data.users[follower].name);
                     fs.appendFile(filePath, content, function (err) { //JSON.stringify(data,null,4)
                         if (err) {
-                            onComplete(err, null);
-                            console.log(err);
+                            //onComplete(err, null);
+                            console.log('Append error: ' + err);
                             //return 0;
                         }
                     });
@@ -205,13 +224,16 @@ function getFollowers(screen_name, cursor, filename, folder){
         }
     );
 
-    var temp = future.wait();
-    console.log('hey ' + filePath);
+    var cursor = future.wait();
+    console.log('File generated: ' + filePath);
 
+    //to index file generated
     Files.insert(filePath, function (err, fileObj) {
         //Inserted new doc with ID fileObj._id, and kicked off the data upload using HTTP
-        console.log('File inserted in Files: ' + filePath);
+        console.log('File indexed in Files: ' + filePath);
     });
 
-    return temp;
+
+
+    return cursor;
 }

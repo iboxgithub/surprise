@@ -29,7 +29,9 @@
 
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                 <table>
+                    <!-- Informations -->
                     <tr>
+                        <!-- Estimations -->
                         <td>
                             {{#each this.estimations}}
                             <div class="panel panel-default">
@@ -63,11 +65,14 @@
                             </div>
                             {{/each}}
                         </td>
+                        <!-- Status -->
                         <td>
-                            Ici mettre les infos de temps remaining et cursor en cours
+                            Ici mettre les infos de temps remaining et cursor en cours: {{this.cursor}} / {{this.time_remaining}} / {{this.time_spent}}
                         </td>
                     </tr>
+                    <!-- Buttons -->
                     <tr>
+
                         <td>
                             <input type="submit" id="process" value="Process" class="btn btn-info"/>
                         </td>
@@ -75,7 +80,11 @@
                             <div class="fileList">
                                 {{#each fileByAccount this.account}}
                                 <div class="file">
-                                    <a href="{{this.url download=true}}" class="btn btn-primary" target="_parent">Download {{this._id}}</a>
+                                    {{#if this._id}}
+                                        <a href="{{this.url download=true}}" class="btn btn-primary" target="_parent">Download {{this._id}}</a>
+                                    {{else}}
+                                        <a class="btn btn-warning" target="_parent">To be processed</a>
+                                    {{/if}}
                                 </div>
                                 {{/each}}
                             </div>

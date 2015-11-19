@@ -36,7 +36,7 @@ Template.dashboard.events({
     'submit .process': function(e){
         e.preventDefault();
         //where to download
-        var folder = '/home';//todo prompt('Please indicate your folder path:');
+        var folder = '/home/ibox';//todo prompt('Please indicate your folder path:');
         console.log('process');
         var account = $(e.target).find('[id=account]').val();
         var _id = $(e.target).find('[id=_id]').val();
@@ -44,7 +44,7 @@ Template.dashboard.events({
 
         console.log(_id + ' - Processing...' + account);
 
-        var params = {cursor:cursor, account:account, filename:'followers_' + account, folder:folder};
+        var params = {cursor:cursor, account:account, filename:account + '.txt', folder:folder};
 
         Meteor.call('followers', params, function(error, result) {
             // display the error to the user and abort
@@ -74,7 +74,12 @@ Template.dashboard.helpers({
     },*/
     fileByAccount: function (account) {
         //console.log('sdfsd ' + account);
-        return Files.find({"original.name":"followers2.txt"}); //todo: update insert
+        var files = [];
+        var file = Files.findOne({"original.name":account + ".txt"});
+        if(!file)
+            file = {};
+        files.push(file);
+        return files; //todo: update insert
     },
     status: function () {
         var account = $(e.target).find('[id=account]').val();
