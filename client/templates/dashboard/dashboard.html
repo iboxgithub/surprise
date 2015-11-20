@@ -33,41 +33,31 @@
                     <tr>
                         <!-- Estimations -->
                         <td>
-                            {{#each this.estimations}}
+                            <!--{{#each this.estimations}}-->
                             <div class="panel panel-default">
                                 <div class="panel-heading" role="tab" id="headingOne">
                                     <h4 class="panel-title">
-                                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{random this.date}}" aria-expanded="true" aria-controls="collapseOne">
-                                            Date of estimation: {{this.date}}
+                                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{random this.estimation.date}}" aria-expanded="true" aria-controls="collapseOne">
+                                            Date of estimation: {{this.estimation.date}}
                                         </a>
                                     </h4>
                                 </div>
-                                <div id="{{random this.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                <div id="{{random this.estimation.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                                     <div class="panel-body">
                                         <label class="control-label" for="amount">Amount of followers</label>
-                                        <input id="amount" class="form-control" value="{{this.amount}}"/>
+                                        <input id="amount" class="form-control" value="{{this.estimation.amount}}"/>
                                         <label class="control-label" for="amount">Time estimated</label>
-                                        <input id="time_estimated" class="form-control" value="{{time_converter this.time_estimated}}"/>
-                                        {{#if this.min_estimates}}
-                                            <label class="control-label" for="mins_estimates">Time estimated (minutes)</label>
-                                            <input id="mins_estimates" class="form-control" value="{{this.mins_estimates}}"/>
-                                        {{/if}}
-                                        {{#if this.hours_estimates}}
-                                            <label class="control-label" for="hours_estimates">Time estimated (hours)</label>
-                                            <input id="hours_estimates" class="form-control" value="{{this.hours_estimates}}"/>
-                                        {{/if}}
-                                        {{#if this.days_estimates}}
-                                            <label class="control-label" for="days_estimates">Time estimated (days)</label>
-                                            <input id="days_estimates" class="form-control" value="{{this.days_estimates}}"/>
-                                        {{/if}}
+                                        <input id="time_estimated" class="form-control" value="{{time_converter this.estimation.time_estimated}}"/>
                                     </div>
                                 </div>
                             </div>
-                            {{/each}}
+                            <!--{{/each}}-->
                         </td>
                         <!-- Status -->
                         <td>
-                            Ici mettre les infos de temps remaining et cursor en cours: {{this.cursor}} / {{this.time_remaining}} / {{this.time_spent}}
+                            Ici mettre les infos de temps remaining et cursor en cours.
+                            <p></p>
+                            cursor:{{this.cursor}} /time remaining: {{this.time_spent}} /time_spent {{time_remaining this.estimation.time_estimated this.time_spent}}
                         </td>
                     </tr>
                     <!-- Buttons -->
@@ -81,9 +71,9 @@
                                 {{#each fileByAccount this.account}}
                                 <div class="file">
                                     {{#if this._id}}
-                                        <a href="{{this.url download=true}}" class="btn btn-primary" target="_parent">Download {{this._id}}</a>
+                                        <a href="{{this.url download=true}}" class="btn btn-success" target="_parent">Download {{this._id}}</a>
                                     {{else}}
-                                        <a class="btn btn-warning" target="_parent">To be processed</a>
+                                        <a class="btn btn-warning" target="_parent" disabled="true">To be processed</a>
                                     {{/if}}
                                 </div>
                                 {{/each}}

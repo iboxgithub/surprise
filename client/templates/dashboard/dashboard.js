@@ -21,12 +21,12 @@ Template.dashboard.events({
             Meteor.call('estimate', params, function(error, result) {
                 // display the error to the user and abort
                 if (error) {
-                    console.log('Client Callback ERROR : ' + error.reason);
+                    console.log('estimation. Client Callback ERROR : ' + error.reason);
                     $('#output').val('Hevon API is unreachable, please contact support');
                 }
                 else {
                     //var time_estimated = result;//JSON.stringify(result, null, 4);
-                    console.log('Client Callback OK : ' + result + ' seconds estimated');
+                    console.log('estimation. Client Callback OK : ' + result + ' seconds estimated');
 
                 }
             });
@@ -49,12 +49,12 @@ Template.dashboard.events({
         Meteor.call('followers', params, function(error, result) {
             // display the error to the user and abort
             if (error) {
-                console.log('Client Callback ERROR : ' + error.reason);
+                console.log('followers. Client Callback ERROR : ' + error.reason);
                 //$('#output').val('Hevon API is unreachable, please contact support');
             }
             else {
                 //var time_estimated = result;//JSON.stringify(result, null, 4);
-                console.log('Client Callback OK : ' + result + ' seconds estimated');
+                console.log('followers. Client Callback OK : Account processed, file available for download');
             }
         });
     }
@@ -64,7 +64,7 @@ Template.dashboard.helpers({
 
     //to get previous estimates stored in DB (subscription done via route)
     operations_dashboard_helper: function(){
-        return Operations.find({},{sort:{estimations:{date:-1}}});//todo: sort doesnt work
+        return Operations.find({},{});
     },
     random: function(date){
         return new Date(date).getTime();
@@ -103,21 +103,37 @@ Template.dashboard.helpers({
     },
     time_converter: function(time){
 
-        if((time / 3600) / 24 > 0.5){//days
-            return ((time / 3600) / 24).toFixed(1) + ' days';
-        }
-        else if((time / 3600) > 1){//hours
-            //if(duration == ''){duration += (time / 3600).toFixed(1) + ' hours'}
-            //else{
-            return (time / 3600).toFixed(1) + ' hours';
-        }
-        else if(time / 60 > 1){//min
-            //if(duration == ''){duration += (time / 60) + ' minutes'}
-            //else{
-            return (time / 60).toFixed(1) + ' minutes';
-        }
-        else{
-            return time + ' seconds';
-        }
+        return f_time_converter(time);
+
+    },
+    time_remaining: function(time_estimated, time_spent){
+
+        var delta = time_estimated - time_spent;
+        console.log();
+        return f_time_converter(delta);
+
     }
 });
+
+// FUNCTIONS -------------------------
+function f_time_converter(time){
+    if((time / 3600) / 24 > 0.5){//days
+        return ((time / 3600) / 24).toFixed(1) + ' days';
+    }
+    else if((time / 3600) > 1){//hours
+        //if(duration == ''){duration += (time / 3600).toFixed(1) + ' hours'}
+        //else{
+        return (time / 3600).toFixed(1) + ' hours';
+    }
+    else if(time / 60 > 1){//min
+        //if(duration == ''){duration += (time / 60) + ' minutes'}
+        //else{
+        return (time / 60).toFixed(1) + ' minutes';
+    }
+    else if(!time){
+        return 'No time';
+    }
+    else{
+        return time + ' seconds';
+    }
+}

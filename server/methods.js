@@ -21,7 +21,7 @@ Meteor.methods({
             out_session_iterations = 15;
         //1 session lasts 15 minutes minimum + 20s as treatment time so 920s to get 3000 results
         var time_estimated = sessions * 920;//...so 920 seconds for 6000 results...
-        time_estimated += out_session_iterations * 10; //1 iteration ~ 10 seconds
+        time_estimated += out_session_iterations * 5; //1 iteration ~ 5 seconds
         time_estimated = time_estimated.toFixed(1);
         // --> around 15 min for sure and
         var date = new Date().toISOString();
@@ -39,22 +39,30 @@ Meteor.methods({
         var item = {
             owner:params.owner,
             account:params.account,
-            cursor:-1
+            cursor:-1,
+            archives:[]
         };
 
         //we check if we already covered that account
-        var item_temp = getAccount(params.account);
+        var item_previous = getAccount(params.account);
 
-        if(item_temp){//we push former and new estimations by merging them
-            item_temp.estimations.unshift(estimation); //we add at the beginning of the array (no need to sort later on)
+        if(item_previous){//we push former and new estimations by merging them
+            /*item_temp.estimations.unshift(estimation); //we add at the beginning of the array (no need to sort later on)
             //we finish the setup of the item
-            item.estimations = item_temp.estimations;
+            item.estimations = item_temp.estimations;*/
+
+            //we get previous archives and we add the last one
+            item_previous.archives.unshift(item_previous.estimation);
+            //we have now up to date archives
+            item.archives = item_previous.archives;//there is always only one estimation
+            //we replace the previous estimation with the new up to date estimation
+            item.estimation = estimation;
 
         }
         else{//we just push new estimation
-            estimations.push(estimation);
+            //estimations.push(estimation);
             //we finish the setup of the item
-            item.estimations = estimations;
+            item.estimation = estimation;
         }
 
         //DB upsert --> regardless if we incremented a new estimation or if it is the first on, we upsert
@@ -79,6 +87,8 @@ Meteor.methods({
 
         var cursor = params.cursor;//1507591097488349000;//-1;
         var n = 0;//, timeout = 1;
+        var t0 = Date.now();
+
 
         //todo: update Operations with process request
         console.log( 'Start API call' ) ;
@@ -90,8 +100,10 @@ Meteor.methods({
 
                 console.log('Sleeping for 15 min (900s)...'); //todo: add estimated time remaining by dividing n
                 //todo: insert remaining time + last cursor to continue treatment in case of failure
+                var tx = Date.now();
+                var time_spent = (tx.getTime() - t0.getTime()) * 1000; //because getTime is in milliseconds
                 //to update operations with last session cursor todo + time remaining
-                Operations.update({account: params.account}, {cursor: cursor}, function (err, fileObj) {
+                Operations.update({account: params.account}, {$set:{cursor: cursor, time_spent:time_spent}}, function (err, fileObj) {
                     console.log('Last session cursor updated in Operations: ' + cursor);
                 });
                 Meteor.sleep(900000); // ms (froatsnook:sleep package)
@@ -106,8 +118,8 @@ Meteor.methods({
         }
         while(cursor != 0);
 
-        //to update operations with last cursor
-        Operations.update({account: params.account}, {cursor: cursor}, function (err, fileObj) {
+        //to update operations with last cursor (we use $set to update specific fileds)
+        Operations.update({account: params.account}, {$set:{cursor: cursor}}, function (err, fileObj) {
             console.log('Last cursor updated in Operations: ' + cursor);
         });
 
