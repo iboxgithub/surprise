@@ -11,16 +11,30 @@ Meteor.methods({
 
         // 15 iterations every 15 min, 200 results per iteration, 1 session = 15 iterations = 3000 results
         //knowing that 1 iteration ~ 10 seconds
+        var time_estimated = 0, sessions = 0, out_session_iterations = 0;
         var amount_results = getEstimate(params.account);
         var iterations = amount_results / 200; //e.g. for 6000 results we have 30 iterations
-        var sessions = iterations / 15 - 1; //...e.g. we would need 30/15 = 2 sessions for 6000 results - 1 session that is not complete (we dont need to wait 15 min because of Twitter API)
-        if(sessions < 0)
-            sessions = 0;//we never go negative
-        var out_session_iterations = iterations % 15;// so 0 in our case --> 15 iterations out of session
-        if(out_session_iterations == 0)
+
+        if(iterations < 15) {
+            sessions = 0;
+            out_session_iterations = iterations;
+        }
+        else {
+            sessions = iterations / 15;// - 1; //...e.g. we would need 30/15 = 2 sessions for 6000 results - 1 session that is not complete (we dont need to wait 15 min because of Twitter API)
+            out_session_iterations = iterations % 15;
+        }
+        //sessions = iterations / 15;// - 1; //...e.g. we would need 30/15 = 2 sessions for 6000 results - 1 session that is not complete (we dont need to wait 15 min because of Twitter API)
+        //if(sessions < 0)
+            //sessions = 0;//we never go negative
+        //else
+            //time_estimated += 900; //for the session we removed during the session calcul
+        //out_session_iterations = iterations % 15;// so 0 in our case --> 15 iterations out of session
+        if(out_session_iterations == 0) {
             out_session_iterations = 15;
+            sessions -= 1;//in this case we remove one session
+        }
         //1 session lasts 15 minutes minimum + 20s as treatment time so 920s to get 3000 results
-        var time_estimated = sessions * 920;//...so 920 seconds for 6000 results...
+        time_estimated = sessions * 920;//...so 920 seconds for 6000 results...
         time_estimated += out_session_iterations * 5; //1 iteration ~ 5 seconds
         time_estimated = time_estimated.toFixed(1);
         // --> around 15 min for sure and
@@ -52,9 +66,15 @@ Meteor.methods({
             item.estimations = item_temp.estimations;*/
 
             //we get previous archives and we add the last one
-            item_previous.archives.unshift(item_previous.estimation);
+            if(!item_previous.archives){//first archiving
+                item_previous.archives = [];
+                item_previous.archives.push(item_previous.estimation);
+            }else{
+                item_previous.archives.unshift(item_previous.estimation);
+            }
             //we have now up to date archives
             item.archives = item_previous.archives;//there is always only one estimation
+
             //we replace the previous estimation with the new up to date estimation
             item.estimation = estimation;
 
@@ -85,6 +105,8 @@ Meteor.methods({
     followers: function(params){
         check(params,Object);
 
+        var fs = Npm.require('fs');
+        var path = Npm.require('path');
         var cursor = params.cursor;//1507591097488349000;//-1;
         var n = 0;//, timeout = 1;
         var t0 = Date.now();
@@ -93,24 +115,45 @@ Meteor.methods({
         //todo: update Operations with process request
         console.log( 'Start API call' ) ;
 
-        do{
-            console.log( 'Loop ' + n ) ;
+        //we reset previous processing data (followers_stored...)
+        Operations.update({account: params.account},
+            {
+                $set:{followers_stored: 0}
+            }, function (err, result) {
+                console.log('Previous processing reseted');
+            });
 
-            if(n % 15 == 0 && n != 0){ //15 iterations par 15 min
+        do{
+            console.log('Session ' + n );
+
+            if(n % 15 == 0 && n != 0){ //1 session = 15 iterations (per 15 min)
 
                 console.log('Sleeping for 15 min (900s)...'); //todo: add estimated time remaining by dividing n
                 //todo: insert remaining time + last cursor to continue treatment in case of failure
                 var tx = Date.now();
                 var time_spent = (tx.getTime() - t0.getTime()) * 1000; //because getTime is in milliseconds
                 //to update operations with last session cursor todo + time remaining
-                Operations.update({account: params.account}, {$set:{cursor: cursor, time_spent:time_spent}}, function (err, fileObj) {
+                Operations.update({account: params.account},
+                    {
+                        $set:{cursor: cursor, time_spent:time_spent},
+                        $inc:{followers_stored: 3000} //because we can only get 3000 results max per 15 min
+                    },
+                    function (err, fileObj) {
                     console.log('Last session cursor updated in Operations: ' + cursor);
                 });
                 Meteor.sleep(900000); // ms (froatsnook:sleep package)
                 console.log('...Awaken');
             }
 
-            cursor = getFollowers(params.account, cursor, params.filename, params.folder);
+            try{
+                cursor = getFollowers(params.account, cursor, params.filename, params.folder);
+            }catch(e){
+                console.log('TOTO');
+                //console.log(e.stack);
+                console.log(JSON.stringify(e,null,4));//JSON.stringify(data,null,4)
+                Meteor.sleep(900000);
+            }
+
 
             n ++;
 
@@ -118,9 +161,27 @@ Meteor.methods({
         }
         while(cursor != 0);
 
+        var tempFile = params.account + ".txt";
+        var previousFile = Files.findOne({"original.name":tempFile});//todo: find how to update a Files doc to add copies
+
+        if(previousFile) //to remove previous file generated todo: enhancement to keep in history? or at least to know the delta? like Git
+            Files.remove({_id:previousFile._id});
+        else
+            console.log('No match for ' + tempFile);
+
+        var filePath = path.join(params.folder, params.filename);
+        //to index file generated
+        Files.insert(filePath, function (err, fileObj) {
+            //Inserted new doc with ID fileObj._id, and kicked off the data upload using HTTP
+            console.log('File ' + filePath + ' indexed in Files: ' + fileObj._id);
+            fs.unlinkSync(filePath);
+            console.log('Temp file [' + filePath + '] has been removed');
+        });
+
         //to update operations with last cursor (we use $set to update specific fileds)
-        Operations.update({account: params.account}, {$set:{cursor: cursor}}, function (err, fileObj) {
-            console.log('Last cursor updated in Operations: ' + cursor);
+        //here we reset the cursor in order to be able to relaunch the Process
+        Operations.update({account: params.account}, {$set:{cursor: -2}}, function (err, result) {
+            console.log('Last cursor updated in Operations: -2');
         });
 
         console.log( 'END' ) ;
@@ -176,9 +237,8 @@ function getEstimate(screen_name){
 function getFollowers(screen_name, cursor, filename, folder){
 
     var Twit = Npm.require('twit');
-    var fs = Npm.require( 'fs' ) ;
-    var path = Npm.require( 'path' ) ;
-    var content = [];
+    var fs = Npm.require('fs');
+    var path = Npm.require('path') ;
     var T = new Twit({
         consumer_key:         'cCbsm31rM8Pdvd5zMBMS3vDbc', // API key
         consumer_secret:      'qy3BNzuU3thNbcAuYuCaHwZGPVXY54CgI0roUU5vhtI3DD4YME', // API secret
@@ -202,8 +262,8 @@ function getFollowers(screen_name, cursor, filename, folder){
         function(err, data, response) {
             if(err){
                 //cursor = 0;
-                onComplete(err, data); console.log(err);
-                return 0;
+                onComplete(err, null); //console.log(err);
+                //return err;
             }
             else{
                 //var base = '/home/ibox';//"C:\\Users\\user\\Documents\\dev" ; //fs.realpathSync('.');
@@ -236,16 +296,7 @@ function getFollowers(screen_name, cursor, filename, folder){
         }
     );
 
-    var cursor = future.wait();
-    console.log('File generated: ' + filePath);
+    var cursor_future = future.wait();
 
-    //to index file generated
-    Files.insert(filePath, function (err, fileObj) {
-        //Inserted new doc with ID fileObj._id, and kicked off the data upload using HTTP
-        console.log('File indexed in Files: ' + filePath);
-    });
-
-
-
-    return cursor;
+    return cursor_future;
 }

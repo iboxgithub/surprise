@@ -28,58 +28,73 @@
                 <input id="account" class="form-control" value="{{this.account}}"/>
 
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                <table>
-                    <!-- Informations -->
-                    <tr>
-                        <!-- Estimations -->
-                        <td>
-                            <!--{{#each this.estimations}}-->
-                            <div class="panel panel-default">
-                                <div class="panel-heading" role="tab" id="headingOne">
-                                    <h4 class="panel-title">
-                                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{random this.estimation.date}}" aria-expanded="true" aria-controls="collapseOne">
-                                            Date of estimation: {{this.estimation.date}}
-                                        </a>
-                                    </h4>
-                                </div>
-                                <div id="{{random this.estimation.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                                    <div class="panel-body">
-                                        <label class="control-label" for="amount">Amount of followers</label>
-                                        <input id="amount" class="form-control" value="{{this.estimation.amount}}"/>
-                                        <label class="control-label" for="amount">Time estimated</label>
-                                        <input id="time_estimated" class="form-control" value="{{time_converter this.estimation.time_estimated}}"/>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Estimates</th>
+                            <th>Status</th>
+                            <th>History</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Informations -->
+                        <tr>
+                            <!-- Estimations -->
+                            <td>
+                                <!--{{#each this.estimations}}-->
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="headingOne">
+                                        <h4 class="panel-title">
+                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{random this.estimation.date}}" aria-expanded="true" aria-controls="collapseOne">
+                                                Date of estimation: {{this.estimation.date}}
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="{{random this.estimation.date}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                        <div class="panel-body">
+                                            <label class="control-label" for="amount">Amount of followers</label>
+                                            <input id="amount" class="form-control" value="{{this.estimation.amount}}"/>
+                                            <label class="control-label" for="amount">Time estimated</label>
+                                            <input id="time_estimated" class="form-control" value="{{time_converter this.estimation.time_estimated}}"/>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!--{{/each}}-->
-                        </td>
-                        <!-- Status -->
-                        <td>
-                            Ici mettre les infos de temps remaining et cursor en cours.
-                            <p></p>
-                            cursor:{{this.cursor}} /time remaining: {{this.time_spent}} /time_spent {{time_remaining this.estimation.time_estimated this.time_spent}}
-                        </td>
-                    </tr>
-                    <!-- Buttons -->
-                    <tr>
+                                <!--{{/each}}-->
+                            </td>
+                            <!-- Status -->
+                            <td>
+                                Cursor:{{cursor this.cursor}}<br>
+                                Time spent: [todo]   |    Time remaining: [todo]<!-- {{this.time_spent}}--><br>
+                                <!-- {{time_remaining this.estimation.time_estimated this.time_spent}} --><br>
+                                Percentage of followers stored: [todo]{{this.followers_stored}} / {{this.estimation.amount}}
+                            </td>
+                            <td>
+                                [todo] Graph with previous estimations <br>
+                                + match it with when the Process has been called
+                            </td>
+                        </tr>
+                        <!-- Buttons -->
+                        <tr>
 
-                        <td>
-                            <input type="submit" id="process" value="Process" class="btn btn-info"/>
-                        </td>
-                        <td>
-                            <div class="fileList">
-                                {{#each fileByAccount this.account}}
-                                <div class="file">
-                                    {{#if this._id}}
+                            <td>
+                                <input type="submit" id="process" value="Process" class="btn btn-info"/>
+                            </td>
+                            <td>
+                                <div class="fileList">
+                                    {{#each fileByAccount this.account}}
+                                    <div class="file">
+                                        {{#if this._id}}
                                         <a href="{{this.url download=true}}" class="btn btn-success" target="_parent">Download {{this._id}}</a>
-                                    {{else}}
+                                        {{else}}
                                         <a class="btn btn-warning" target="_parent" disabled="true">To be processed</a>
-                                    {{/if}}
+                                        {{/if}}
+                                    </div>
+                                    {{/each}}
                                 </div>
-                                {{/each}}
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    </tbody>
+
                 </table>
             </div>
         </div>

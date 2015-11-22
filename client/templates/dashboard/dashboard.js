@@ -46,6 +46,7 @@ Template.dashboard.events({
 
         var params = {cursor:cursor, account:account, filename:account + '.txt', folder:folder};
 
+        //then we launch the processing in the BO
         Meteor.call('followers', params, function(error, result) {
             // display the error to the user and abort
             if (error) {
@@ -111,6 +112,18 @@ Template.dashboard.helpers({
         var delta = time_estimated - time_spent;
         console.log();
         return f_time_converter(delta);
+
+    },
+    cursor: function(cursor){
+
+        if(cursor == 0)
+            return 'Account already processed, results available for download';
+        else if(cursor == -1)
+            return 'Account to process';
+        else if(cursor == -2)
+            return 'Account already processed, you can relaunch if necessary';
+        else
+            return 'Processing.... cursor [' + cursor + '] is ongoing';
 
     }
 });
