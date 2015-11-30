@@ -35,29 +35,41 @@ Template.dashboard.events({
     //to grab all followers of this account
     'submit .process': function(e){
         e.preventDefault();
-        //where to download
-        var folder = '/home/ibox';//todo prompt('Please indicate your folder path:');
-        console.log('process');
-        var account = $(e.target).find('[id=account]').val();
-        var _id = $(e.target).find('[id=_id]').val();
-        var cursor = $(e.target).find('[id=cursor]').val();
 
-        console.log(_id + ' - Processing...' + account);
+        //check if we can use the API
+        var api_used = Cloud.findOne({api:'twitter'}, {_id:0, used:1}).used;
 
-        var params = {cursor:cursor, account:account, filename:account + '.txt', folder:folder};
+        if(api_used == true){
+            console.log('API used');
+            alert('API already used...');
+        }else{
+            //where to download
+            var folder = '/home/ibox';//todo prompt('Please indicate your folder path:');
+            console.log('process');
+            var account = $(e.target).find('[id=account]').val();
+            var _id = $(e.target).find('[id=_id]').val();
+            var cursor = $(e.target).find('[id=cursor]').val();
+            var amount_followers = $(e.target).find('[id=amount_followers]').val();
 
-        //then we launch the processing in the BO
-        Meteor.call('followers', params, function(error, result) {
-            // display the error to the user and abort
-            if (error) {
-                console.log('followers. Client Callback ERROR : ' + error.reason);
-                //$('#output').val('Hevon API is unreachable, please contact support');
-            }
-            else {
-                //var time_estimated = result;//JSON.stringify(result, null, 4);
-                console.log('followers. Client Callback OK : Account processed, file available for download');
-            }
-        });
+            console.log(_id + ' - Processing...' + account);
+
+            var params = {cursor:cursor, account:account, filename:account + '.txt', folder:folder, amount_followers: amount_followers};
+
+            //then we launch the processing in the BO
+            Meteor.call('followers', params, function(error, result) {
+                // display the error to the user and abort
+                if (error) {
+                    console.log('followers. Client Callback ERROR : ' + error.reason);
+                    //$('#output').val('Hevon API is unreachable, please contact support');
+                }
+                else {
+                    //var time_estimated = result;//JSON.stringify(result, null, 4);
+                    console.log('followers. Client Callback OK : Process ongoing');
+                }
+            });
+        }
+
+
     }
 });
 
@@ -73,8 +85,19 @@ Template.dashboard.helpers({
     /*files: function () {
         return Files.find({"original.name":"followers2.txt"});
     },*/
+    date_last_call: function(){
+        var tmp = Cloud.findOne({api:'twitter'}, {_id:0, date_last_call:1}); //todo: use react dict and/or route (to have the data context)
+        return tmp.date_last_call;
+    },
+    api_used: function(){
+        var tmp = Cloud.findOne({api:'twitter'}, {_id:0, used:1}); //todo: use react dict and/or route (to have the data context)
+        return '' + tmp.used;
+    },
+    calls_used: function(){
+        var tmp = Cloud.findOne({api:'twitter'}, {_id:0, calls_used:1}); //todo: use react dict and/or route (to have the data context)
+        return tmp.calls_used;
+    },
     fileByAccount: function (account) {
-        //console.log('sdfsd ' + account);
         var files = [];
         var file = Files.findOne({"original.name":account + ".txt"});
         if(!file)

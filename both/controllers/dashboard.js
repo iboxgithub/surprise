@@ -9,6 +9,7 @@ DashboardController = AppController.extend({
   waitOn: function() {
     return [
         this.subscribe('operations_dashboard'),
+        this.subscribe('cloud'),
         this.subscribe('files')
         ]
   },

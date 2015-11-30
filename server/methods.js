@@ -118,15 +118,24 @@ Meteor.methods({
         //we reset previous processing data (followers_stored...)
         Operations.update({account: params.account},
             {
-                $set:{followers_stored: 0}
+                $set:{followers_stored: 0, time_spent:0}
             }, function (err, result) {
                 console.log('Previous processing reseted');
+            });
+
+        //we update the cloud watchdog
+        Cloud.upsert({api: 'twitter'},
+            {
+                $set:{used: true}
+            },
+            function (err, fileObj) {
+                console.log('Cloud Start update: done');
             });
 
         do{
             console.log('Session ' + n );
 
-            if(n % 15 == 0 && n != 0){ //1 session = 15 iterations (per 15 min)
+            /*if(n % 15 == 0 && n != 0){ //1 session = 15 iterations (per 15 min)
 
                 console.log('Sleeping for 15 min (900s)...'); //todo: add estimated time remaining by dividing n
                 //todo: insert remaining time + last cursor to continue treatment in case of failure
@@ -136,22 +145,96 @@ Meteor.methods({
                 Operations.update({account: params.account},
                     {
                         $set:{cursor: cursor, time_spent:time_spent},
-                        $inc:{followers_stored: 3000} //because we can only get 3000 results max per 15 min
+                        $inc:{followers_stored: n * 200} //todo: maybe 200 to add
                     },
                     function (err, fileObj) {
                     console.log('Last session cursor updated in Operations: ' + cursor);
                 });
                 Meteor.sleep(900000); // ms (froatsnook:sleep package)
                 console.log('...Awaken');
-            }
+            }*/
 
             try{
                 cursor = getFollowers(params.account, cursor, params.filename, params.folder);
-            }catch(e){
-                console.log('TOTO');
+                var nb = 0; //nb followers
+                if(cursor == 0){
+                    nb = parseInt(params.amount_followers); //last iteration so followers stored is at max
+                    //###### to update operations with last session cursor
+                    Operations.update({account: params.account},
+                        {
+                            $set:{cursor: cursor, followers_stored: nb}//we dont increment anymore cause it is the last iteration
+                        },
+                        function (err, fileObj) {
+                            console.log('Last session cursor updated in Operations: ' + cursor);
+                        });
+                }
+                else{
+                    //###### to update operations with last session cursor
+                    Operations.update({account: params.account},
+                        {
+                            $set:{cursor: cursor},//we dont increment anymore cause it is the last iteration
+                            $inc:{followers_stored: 200}
+                        },
+                        function (err, fileObj) {
+                            console.log('Last session cursor updated in Operations: ' + cursor);
+                        });
+                }
+
+                //###### we update Cloud in order to be aware how much the API is requested (even without breaching limit --> concurent accesses)
+                Cloud.upsert({api: 'twitter'},
+                    {
+                        $set:{date_last_call: Date.now()},
+                        $inc:{calls_used: 1}
+                    },
+                    function (err, fileObj) {
+                        console.log('Cloud iteration update: done');
+                    });
+            }
+            catch(e){
+                console.log('API limit detected, last cursor: ' + cursor);
                 //console.log(e.stack);
                 console.log(JSON.stringify(e,null,4));//JSON.stringify(data,null,4)
-                Meteor.sleep(900000);
+
+                //NOTE PERSO: cursor useless already done in last iteration, time spent to calculate dyna on GUI with followers_stored, followers_stored idem cursor)
+                //console.log('Operations update: cursor, time_spent and followers_stored');
+                //todo: insert remaining time + last cursor to continue treatment in case of failure
+                //var tx = Date.now();
+                //var time_spent = (tx.getTime() - t0.getTime()) * 1000; //because getTime is in milliseconds
+
+                //###### to update operations with last session cursor todo + time remaining
+                /*Operations.update({account: params.account},
+                    {
+                        $set:{cursor: cursor, time_spent:time_spent},
+                        $inc:{followers_stored: n * 200} //todo: maybe 200 to ad, normally no
+                    },
+                    function (err, fileObj) {
+                        console.log('Last session cursor updated in Operations: ' + cursor);
+                    });*/
+
+                //###### to follow API status
+                console.log('Cloud API limit start update:date_last_limit, calls_used');
+                Cloud.upsert({api: 'twitter'},
+                    {
+                        $set:{date_last_limit: Date.now(), calls_used: 15}
+                        //,                        $inc:{calls_used: n} //todo: maybe 200 to ad, normally no
+                    },
+                    function (err, fileObj) {
+                        console.log('Cloud API limit update: done');
+                    });
+
+                console.log('Sleeping for 15 min (900s)...');
+                Meteor.sleep(900000); // ms (froatsnook:sleep package)
+                //###### to follow API status
+                console.log('Cloud API limit end update:date_last_limit, date_last_call, calls_used');
+                Cloud.upsert({api: 'twitter'},
+                    {
+                        $set:{date_last_limit: 0, date_last_call: 0, calls_used: 0}
+                        //,                        $inc:{calls_used: n} //todo: maybe 200 to ad, normally no
+                    },
+                    function (err, fileObj) {
+                        console.log('Cloud API limit update: done');
+                    });
+                console.log('...Awaken');
             }
 
 
@@ -169,6 +252,7 @@ Meteor.methods({
         else
             console.log('No match for ' + tempFile);
 
+        //once we are sure potential previous file has been deleted we can insert (todo: historization)
         var filePath = path.join(params.folder, params.filename);
         //to index file generated
         Files.insert(filePath, function (err, fileObj) {
@@ -184,7 +268,17 @@ Meteor.methods({
             console.log('Last cursor updated in Operations: -2');
         });
 
-        console.log( 'END' ) ;
+        //###### to follow API status
+        console.log('Cloud end process update: used, date_last_limit, calls_used');
+        Cloud.upsert({api: 'twitter'},
+            {
+                $set:{used: false}
+            },
+            function (err, fileObj) {
+                console.log('Cloud API limit update: done');
+            });
+
+        console.log( '### END followers ###' ) ;
     }
 
 });
@@ -246,8 +340,11 @@ function getFollowers(screen_name, cursor, filename, folder){
         access_token_secret:  'IWevuIf3QPgFU5YjxcH6ya0uEDcAhDEi7nOj0hQqNUEcE'
     });
 
+    if(cursor == -2)
+        cursor = -1; //todo: to replace in Operations update
+
     // Set up a future
-    Future = Npm.require('fibers/future');
+    var Future = Npm.require('fibers/future');
     var future = new Future();
     // A callback so the job can signal completion
     var onComplete = future.resolver();
@@ -282,7 +379,7 @@ function getFollowers(screen_name, cursor, filename, folder){
                             + data.users[follower].location + "|\n"
                         ;
 
-                    console.log(data.users[follower].name);
+                    //console.log(data.users[follower].name);
                     fs.appendFile(filePath, content, function (err) { //JSON.stringify(data,null,4)
                         if (err) {
                             //onComplete(err, null);
@@ -296,7 +393,7 @@ function getFollowers(screen_name, cursor, filename, folder){
         }
     );
 
-    var cursor_future = future.wait();
+    //var cursor_future = future.wait();
 
-    return cursor_future;
+    return future.wait();
 }

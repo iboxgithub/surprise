@@ -3,7 +3,7 @@
 
     <table>
         <tr>
-            <td >
+            <td style="padding-right:30px">
                 <form class="estimation">
                     <div class="form-group">
                         <label class="control-label" for="twitter_account">Enter the Twitter account (@account)</label>
@@ -14,6 +14,16 @@
                     <input type="submit" id="estimate" value="Estimate processing time" class="btn btn-primary"/>
                 </form>
             </td>
+            <td >
+                <div class="form-group">
+                    <label class="control-label" for="api_used">Api used</label>
+                    <input id="api_used" class="form-control" value="{{api_used}}"/>
+                    <label class="control-label" for="calls_used">Calls used ( /15 )</label>
+                    <input id="calls_used" class="form-control" value="{{calls_used}}"/>
+                    <label class="control-label" for="date_last_call">date_last_call</label>
+                    <input id="date_last_call" class="form-control" value="{{date_last_call}}"/>
+                </div>
+            </td>
         </tr>
     </table>
 
@@ -21,7 +31,7 @@
     {{#each operations_dashboard_helper}}
     <form class="process">
         <div class="form-group">
-            <p>__________________________________</p>
+            <p>__________________________________________________________________________________________________</p>
             <input type="hidden" id="_id" value="{{this._id}}"/>
             <input type="hidden" id="cursor" value="{{this.cursor}}"/>
             <label class="control-label" for="account">Account requested</label>
@@ -66,7 +76,8 @@
                                 Cursor:{{cursor this.cursor}}<br>
                                 Time spent: [todo]   |    Time remaining: [todo]<!-- {{this.time_spent}}--><br>
                                 <!-- {{time_remaining this.estimation.time_estimated this.time_spent}} --><br>
-                                Percentage of followers stored: [todo]{{this.followers_stored}} / {{this.estimation.amount}}
+                                Percentage of followers stored: {{this.followers_stored}} / {{this.estimation.amount}}
+                                <input type="hidden" id="amount_followers" value="{{this.estimation.amount}}"/>
                             </td>
                             <td>
                                 [todo] Graph with previous estimations <br>
