@@ -6,7 +6,7 @@ Cloud = new Mongo.Collection('cloud');
 Operations = new Mongo.Collection('operations');
 
 Files = new FS.Collection("files", {
-    stores: [new FS.Store.FileSystem("files", {path: "~/surprise_uploads"})]
+    stores: [new FS.Store.FileSystem("files", {path: Meteor.settings.cfs_storage})]
 });
 
 Files.allow({
