@@ -292,7 +292,7 @@ function getAccount(screen_name){
 
 function getEstimate(screen_name){
 
-    var Twit = Npm.require('twit');
+    //var Twit = Npm.require('twit');
     var content = [];
     var T = new Twit({
         consumer_key:         'cCbsm31rM8Pdvd5zMBMS3vDbc', // API key
@@ -330,7 +330,7 @@ function getEstimate(screen_name){
 
 function getFollowers(screen_name, cursor, filename, folder){
 
-    var Twit = Npm.require('twit');
+    //var Twit = Npm.require('twit');
     var fs = Npm.require('fs');
     var path = Npm.require('path') ;
     var T = new Twit({
