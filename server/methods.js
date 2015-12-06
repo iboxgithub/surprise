@@ -89,11 +89,11 @@ Meteor.methods({
         Operations.upsert({account:params.account},item,
             function(error,resultId) {
                 if (error) {
-                    console.log('error : ' + error.reason);
+                    console.log('Estimate error : ' + error.reason);
                     //self.response.end(JSON.stringify(msgErrorConnection));
                 }
                 else {
-                    console.log('insert OK: ' + params.account);
+                    console.log('Estimate OK: ' + params.account);
                     //var amount_sent = parseFloat(reqBody.amount_from);
 
                 }

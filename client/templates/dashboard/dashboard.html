@@ -7,8 +7,9 @@
                 <form class="estimation">
                     <div class="form-group">
                         <label class="control-label" for="twitter_account">Enter the Twitter account (@account)</label>
-                        <div class="twitter_account">
-                            <input id="twitter_account" class="form-control"/>
+                        <div class="input-group">
+                            <span class="input-group-addon" >@</span>
+                            <input id="twitter_account" placeholder="account" class="form-control" />
                         </div>
                     </div>
                     <input type="submit" id="estimate" value="Estimate processing time" class="btn btn-primary"/>
@@ -76,7 +77,7 @@
                                 Cursor:{{cursor this.cursor}}<br>
                                 Time spent: [todo]   |    Time remaining: [todo]<!-- {{this.time_spent}}--><br>
                                 <!-- {{time_remaining this.estimation.time_estimated this.time_spent}} --><br>
-                                Percentage of followers stored: {{this.followers_stored}} / {{this.estimation.amount}}
+                                Amount of followers stored: {{this.followers_stored}} / {{this.estimation.amount}}
                                 <input type="hidden" id="amount_followers" value="{{this.estimation.amount}}"/>
                             </td>
                             <td>
